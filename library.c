@@ -6,6 +6,7 @@
 #include "lib\data_structures\Void_Vector_lib.h"
 #include <stdbool.h>
 #include "lib\data_structures\Words.h"
+#include <math.h>
 
 void generate_random_matrix_file(const char* filename, size_t n) {
 
@@ -808,6 +809,177 @@ void test_leave_longest() {
     test_leave_longest_word_3_more_element_in_line();
 }
 
+typedef struct monomial {
+    size_t degree;
+    double coefficient;
+} monomial;
+
+void generate_polynomial(const char* filename) {
+
+    FILE* file = fopen(filename, "wb");
+    if (file == NULL) {
+        printf("reading error\n");
+        exit(1);
+    }
+
+    int amount_polynomial = rand() % 5 + 2;
+
+    for (int k = 0; k < amount_polynomial; k++) {
+        int amount_monomial = rand() % 5 + 1;
+
+        monomial mono;
+        for (int i = 0; i <= amount_monomial; i++) {
+            mono.degree = amount_monomial - i;
+            mono.coefficient = 2.0 * rand() / RAND_MAX - 1.0;
+
+            fwrite(&mono, sizeof(monomial), 1, file);
+        }
+    }
+
+    fclose(file);
+}
+
+double get_monomial_value(monomial mono, double x) {
+    return pow(x, mono.degree) * mono.coefficient;
+}
+
+void remove_true_polynomial(const char* filename, double x) {
+    vectorVoid v = createVoidVector(16, sizeof(monomial));
+
+    FILE* file = fopen(filename, "rb");
+    if (file == NULL) {
+        printf("reading error\n");
+        exit(1);
+    }
+
+    monomial mono;
+    while (fread(&mono, sizeof(monomial), 1, file) == 1)
+        pushBackVoid(&v, &mono);
+
+    fclose(file);
+
+    file = fopen(filename, "wb");
+    if (file == NULL) {
+        printf("reading error\n");
+        exit(1);
+    }
+
+    monomial m;
+    vectorVoid temp = createVoidVector(8, sizeof(monomial));
+    double res = 0;
+    for (size_t i = 0; i < v.size; i++) {
+        getVoidVectorValue(&v, i, &m);
+        pushBackVoid(&temp, &m);
+        res += get_monomial_value(m, x);
+
+        if (m.degree == 0) {
+            if (fabs(res) >= 0.001) {
+                monomial temp_mono;
+                for (size_t j = 0; j < temp.size; j++) {
+                    getVoidVectorValue(&temp, j, &temp_mono);
+                    fwrite(&temp_mono, sizeof(monomial), 1, file);
+                }
+            }
+
+            clearVoid(&temp);
+            res = 0;
+        }
+    }
+
+    deleteVoidVector(&v);
+    deleteVoidVector(&temp);
+
+    fclose(file);
+}
+
+void test_remove_true_polynomial_1_empty_file() {
+    const char filename[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_6_test_1.txt";
+
+    FILE* file = fopen(filename, "wb");
+    fclose(file);
+
+    remove_true_polynomial(filename, 1.0);
+
+    file = fopen(filename, "rb");
+
+    char data[10] = "";
+    fscanf(file, "%s", data);
+
+    fclose(file);
+
+    assert(strcmp(data, "") == 0);
+}
+
+void test_remove_true_polynomial_2_not_true_expression() {
+    const char filename[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_6_test_2.txt";
+
+    double x = 2.0;
+    monomial x_2 = {.coefficient = 5.0, .degree = 2};
+    monomial x_1 = {.coefficient = 3.0, .degree = 1};
+    monomial c = {.coefficient = 10.0, .degree = 0};
+
+    FILE* file = fopen(filename, "wb");
+
+    fwrite(&x_2, sizeof(monomial), 1, file);
+    fwrite(&x_1, sizeof(monomial), 1, file);
+    fwrite(&c, sizeof(monomial), 1, file);
+
+    fclose(file);
+
+    remove_true_polynomial(filename, x);
+
+    file = fopen(filename, "rb");
+
+    monomial res_x_2;
+    fread(&res_x_2, sizeof(monomial), 1, file);
+
+    monomial res_x_1;
+    fread(&res_x_1, sizeof(monomial), 1, file);
+
+    monomial res_c;
+    fread(&res_c, sizeof(monomial), 1, file);
+
+    fclose(file);
+
+    assert(x_2.coefficient - res_x_2.coefficient <= 0.0001 && x_2.degree == res_x_2.degree);
+    assert(x_1.coefficient - res_x_1.coefficient <= 0.0001 && x_1.degree == res_x_1.degree);
+    assert(c.coefficient - res_c.coefficient <= 0.0001 && c.degree == res_c.degree);
+}
+
+void test_remove_true_polynomial_3_true_expression() {
+    const char filename[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_6_test_3.txt";
+
+    double x = -1.0;
+    monomial x_2 = {.coefficient = 3.0, .degree = 2};
+    monomial x_1 = {.coefficient = 6.0, .degree = 1};
+    monomial c = {.coefficient = 3.0, .degree = 0};
+
+    FILE* file = fopen(filename, "wb");
+
+    fwrite(&x_2, sizeof(monomial), 1, file);
+    fwrite(&x_1, sizeof(monomial), 1, file);
+    fwrite(&c, sizeof(monomial), 1, file);
+
+    fclose(file);
+
+    remove_true_polynomial(filename, x);
+
+    file = fopen(filename, "rb");
+
+    char data[10] = "";
+    fscanf(file, "%s", data);
+
+    fclose(file);
+
+    assert(strcmp(data, "") == 0);
+}
+
+void test_remove_true_polynomial() {
+    test_remove_true_polynomial_1_empty_file();
+    test_remove_true_polynomial_2_not_true_expression();
+    test_remove_true_polynomial_3_true_expression();
+}
+
 int main(){
 
     test_matrix_transpose();
@@ -815,4 +987,5 @@ int main(){
     test_calculate();
     test_filter_word();
     test_leave_longest();
+    test_remove_true_polynomial();
 }
