@@ -980,6 +980,335 @@ void test_remove_true_polynomial() {
     test_remove_true_polynomial_3_true_expression();
 }
 
+void generate_numbers_array(const char* filename) {
+
+    FILE* file = fopen(filename, "wb");
+    if (file == NULL) {
+        printf("reading error\n");
+        exit(1);
+    }
+
+    int amount_numbers = (int) rand() % 10 + 1;
+
+    for (int i = 0; i < amount_numbers; i++) {
+        int x = rand() % 200 - 100;
+        fwrite(&x, sizeof(int), 1, file);
+    }
+
+    fclose(file);
+}
+
+void positive_first(const char* filename) {
+    vector positive_numbers = createVector(2);
+    vector negative_numbers = createVector(2);
+
+    FILE* file = fopen(filename, "rb");
+    if (file == NULL) {
+        printf("reading error\n");
+        exit(1);
+    }
+
+    int current_number;
+    while (fread(&current_number, sizeof(int), 1, file) == 1) {
+        if (current_number >= 0)
+            pushBack(&positive_numbers, current_number);
+        else
+            pushBack(&negative_numbers, current_number);
+    }
+
+    fclose(file);
+
+    file = fopen(filename, "wb");
+    if (file == NULL) {
+        printf("reading error\n");
+        exit(1);
+    }
+
+    for (int i = 0; i < positive_numbers.size; i++)
+        fwrite(positive_numbers.data + i, sizeof(int), 1, file);
+
+    for (int i = 0; i < negative_numbers.size; i++)
+        fwrite(negative_numbers.data + i, sizeof(int), 1, file);
+
+    deleteVector(&positive_numbers);
+    deleteVector(&negative_numbers);
+    fclose(file);
+}
+
+void test_positive_first_1_only_negative() {
+    const char filename[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_7_test_1.txt";
+
+    int x1 = -8;
+    int x2 = -7;
+    int x3 = -6;
+
+    FILE* file = fopen(filename, "wb");
+
+    fwrite(&x1, sizeof(int), 1, file);
+    fwrite(&x2, sizeof(int), 1, file);
+    fwrite(&x3, sizeof(int), 1, file);
+
+    fclose(file);
+
+    positive_first(filename);
+
+    file = fopen(filename, "rb");
+
+    int res_1, res_2, res_3;
+    fread(&res_1, sizeof(int), 1, file);
+    fread(&res_2, sizeof(int), 1, file);
+    fread(&res_3, sizeof(int), 1, file);
+
+    fclose(file);
+
+    assert(x1 == res_1);
+    assert(x2 == res_2);
+    assert(x3 == res_3);
+}
+
+void test_positive_first_2_only_positive() {
+    const char filename[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_7_test_2.txt";
+
+    int x1 = 9;
+    int x2 = 9;
+    int x3 = 3;
+
+    FILE* file = fopen(filename, "wb");
+
+    fwrite(&x1, sizeof(int), 1, file);
+    fwrite(&x2, sizeof(int), 1, file);
+    fwrite(&x3, sizeof(int), 1, file);
+
+    fclose(file);
+
+    positive_first(filename);
+
+    file = fopen(filename, "rb");
+
+    int res_1, res_2, res_3;
+    fread(&res_1, sizeof(int), 1, file);
+    fread(&res_2, sizeof(int), 1, file);
+    fread(&res_3, sizeof(int), 1, file);
+
+    fclose(file);
+
+    assert(x1 == res_1);
+    assert(x2 == res_2);
+    assert(x3 == res_3);
+}
+
+void test_positive_first_3_both() {
+    const char filename[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_7_test_3.txt";
+
+    int x5 = -7;
+    int x1 = 1;
+    int x2 = 0;
+    int x3 = 0;
+    int x4 = 0;
+
+    FILE* file = fopen(filename, "wb");
+
+    fwrite(&x5, sizeof(int), 1, file);
+    fwrite(&x1, sizeof(int), 1, file);
+    fwrite(&x2, sizeof(int), 1, file);
+    fwrite(&x3, sizeof(int), 1, file);
+    fwrite(&x4, sizeof(int), 1, file);
+
+    fclose(file);
+
+    positive_first(filename);
+
+    file = fopen(filename, "rb");
+
+    int res_1, res_2, res_3, res_4, res_5;
+    fread(&res_1, sizeof(int), 1, file);
+    fread(&res_2, sizeof(int), 1, file);
+    fread(&res_3, sizeof(int), 1, file);
+    fread(&res_4, sizeof(int), 1, file);
+    fread(&res_5, sizeof(int), 1, file);
+
+    fclose(file);
+
+    assert(res_1 == x1);
+    assert(res_2 == x2);
+    assert(res_3 == x3);
+    assert(res_4 == x4);
+    assert(res_5 == x5);
+}
+
+void test_positive_first() {
+    test_positive_first_1_only_negative();
+    test_positive_first_2_only_positive();
+    test_positive_first_3_both();
+}
+
+void generate_non_symmetric_matrix(const char* filename) {
+
+    FILE* file = fopen(filename, "wb");
+    if (file == NULL) {
+        printf("reading error\n");
+        exit(1);
+    }
+
+    int n = rand() % 2 + 2;
+    fwrite(&n, sizeof(int), 1, file);
+
+    int amount_matrix = rand() % 3 + 1;
+
+    for (int k = 0; k < amount_matrix; k++) {
+        int matrix[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                matrix[i][j] = rand() % 100;
+            }
+        }
+        fwrite(matrix, sizeof(int), n * n, file);
+    }
+
+    fclose(file);
+}
+
+void transpose_non_symmetric_matrix(const char* filename) {
+    FILE* file = fopen(filename, "r+b");
+    if (file == NULL) {
+        printf("Ошибка при открытии файла.\n");
+        return;
+    }
+
+    int n;
+    if (fread(&n, sizeof(int), 1, file) != 1) {
+        printf("Ошибка при чтении порядка матрицы.\n");
+        fclose(file);
+        return;
+    }
+
+    while(1) {
+        int matrix[n][n];
+        size_t read_count = fread(matrix, sizeof(int), n * n, file);
+        if (read_count != n * n) {
+            if (feof(file)) {
+                break;
+            } else {
+                printf("Ошибка при чтении матрицы.\n");
+                break;
+            }
+        }
+
+        if (!isSymmetricMatrix(matrix)) {
+            transposeSquareMatrix(matrix);
+            fseek(file, -(long int)read_count * sizeof(int), SEEK_CUR);
+            fwrite(matrix, sizeof(int), read_count, file);
+            fseek(file, (long int)read_count * sizeof(int), SEEK_CUR);
+        }
+    }
+
+    fclose(file);
+}
+
+void test_transpose_non_symmetric_matrix_1_empty_matrix() {
+    const char filename[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_8_test_1.txt";
+
+    int n = 0;
+    FILE* file = fopen(filename, "wb");
+
+    fwrite(&n, sizeof(int), 1, file);
+
+    fclose(file);
+
+    file = fopen(filename, "rb");
+
+    int res_n;
+    fread(&res_n, sizeof(int), 1, file);
+
+    fclose(file);
+
+    assert(n == res_n);
+}
+
+void test_transpose_non_symmetric_matrix_2_symmetric_matrix() {
+    const char filename[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_8_test_3.txt";
+
+    FILE* file = fopen(filename, "wb");
+
+    int n = 3;
+    matrix m = createMatrixFromArray((int[]) {1, 0, 0,
+                                              0, 1, 0,
+                                              0, 0, 1}, 3, 3);
+
+    fwrite(&n, sizeof(int), 1, file);
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            fwrite(&m.values[i][j], sizeof(int), 1, file);
+
+    fclose(file);
+
+    transpose_non_symmetric_matrix(filename);
+
+    file = fopen(filename, "rb");
+
+    int res_n;
+    fread(&res_n, sizeof(int), 1, file);
+    matrix res_m = getMemMatrix(res_n, res_n);
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            fread(&res_m.values[i][j], sizeof(int), 1, file);
+
+    fclose(file);
+
+    assert(areTwoMatrixEqual(&res_m, &m));
+
+    freeMemMatrix(&m);
+    freeMemMatrix(&res_m);
+}
+
+void test_transpose_non_symmetric_matrix_3_non_symmetric_matrix() {
+    const char filename[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_8_test_4.txt";
+
+    FILE* file = fopen(filename, "wb");
+
+    int n = 3;
+    matrix m = createMatrixFromArray((int[]) {1, 2, 3,
+                                              4, 5, 6,
+                                              7, 8, 9}, 3, 3);
+
+    fwrite(&n, sizeof(int), 1, file);
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            fwrite(&m.values[i][j], sizeof(int), 1, file);
+
+    fclose(file);
+
+    transpose_non_symmetric_matrix(filename);
+
+    file = fopen(filename, "rb");
+
+    int res_n;
+    fread(&res_n, sizeof(int), 1, file);
+    matrix res_m = getMemMatrix(res_n, res_n);
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            fread(&res_m.values[i][j], sizeof(int), 1, file);
+
+    fclose(file);
+
+    matrix check = createMatrixFromArray((int[]) {1, 4, 7,
+                                                  2, 5, 8,
+                                                  3, 6, 9}, 3, 3);
+
+    assert(res_n == n);
+    assert(areTwoMatrixEqual(&res_m, &check));
+
+    freeMemMatrix(&m);
+    freeMemMatrix(&res_m);
+    freeMemMatrix(&res_m);
+}
+
+void test_transpose_non_symmetric_matrix() {
+    test_transpose_non_symmetric_matrix_1_empty_matrix();
+    test_transpose_non_symmetric_matrix_2_symmetric_matrix();
+    test_transpose_non_symmetric_matrix_3_non_symmetric_matrix();
+}
+
 int main(){
 
     test_matrix_transpose();
@@ -988,4 +1317,6 @@ int main(){
     test_filter_word();
     test_leave_longest();
     test_remove_true_polynomial();
+    test_positive_first();
+    test_transpose_non_symmetric_matrix();
 }
