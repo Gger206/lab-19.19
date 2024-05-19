@@ -4,7 +4,8 @@
 #include <assert.h>
 #include "lib\data_structures\String_lib.h"
 #include "lib\data_structures\Void_Vector_lib.h"
-#include  <stdbool.h>
+#include <stdbool.h>
+#include "lib\data_structures\Words.h"
 
 void generate_random_matrix_file(const char* filename, size_t n) {
 
@@ -459,9 +460,161 @@ void test_calculate() {
     test_calculate_expression_3_operand();
 }
 
+void generate_string(const char* filename, char* source_string) {
+    FILE* file = fopen(filename, "w");
+    if (file == NULL) {
+        printf("reading error\n");
+        exit(1);
+    }
+
+    size_t string_length = strlen_(source_string);
+
+    for (size_t i = 0; i <= string_length; i++)
+        fprintf(file, "%c", source_string[i]);
+
+    fclose(file);
+}
+
+int compare_letters(const void* s1, const void* s2) {
+        return *(const unsigned char*) s1 - *(const unsigned char*) s2;
+}
+
+void sort_word_letters(WordDescriptor* word) {
+    qsort(word->begin, word->end - word->begin + 1, sizeof(char), compare_letters);
+}
+
+bool is_letters_in_word(WordDescriptor sub_word, WordDescriptor word) {
+    bool include[English_Alphabet] = {0};
+
+    char* start = word.begin;
+    char* end = word.end + 1;
+
+    while (start != end) {
+        if (isalpha(*start))
+            include[*start - 97] = true;
+
+        start++;
+    }
+
+    while (sub_word.begin + 1 <= sub_word.end) {
+        if (!include[*(sub_word.begin + 1) - 97])
+            return false;
+
+        sub_word.begin++;
+    }
+
+    return true;
+}
+
+void filter_word(const char* filename, char* source_word) {
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("reading error\n");
+        exit(1);
+    }
+
+    fseek(file, 0, SEEK_END);
+    size_t length = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    if (length == 0){
+        return;
+        }
+
+    fread(_stringBuffer, sizeof(char), length, file);
+    _stringBuffer[length] = '\0';
+
+    fclose(file);
+
+    WordDescriptor word;
+    getWord(source_word, &word);
+    sort_word_letters(&word);
+
+    BagOfWords words = {.size = 0};
+    char* begin_search = _stringBuffer;
+    while (getWord(begin_search, &words.words[words.size])) {
+        begin_search = words.words[words.size].end + 1;
+        words.size++;
+    }
+
+    file = fopen(filename, "w");
+    if (file == NULL) {
+        printf("reading error\n");
+        exit(1);
+    }
+
+    for (size_t i = 0; i < words.size; i++) {
+        if (is_letters_in_word(word, words.words[i])) {
+            while (words.words[i].begin <= words.words[i].end) {
+                fprintf(file, "%c", *words.words[i].begin);
+                words.words[i].begin++;
+            }
+            fprintf(file, " ");
+        }
+    }
+
+    fprintf(file, "%c", '\0');
+
+    fclose(file);
+}
+
+
+void test_filter_word_1_empty_file() {
+    const char filename[] = "D:\\GitHub\\OP\\Lab19\\task_4_test_1.txt";
+
+    generate_string(filename, "");
+    char source_word[] = "word";
+    filter_word(filename, source_word);
+
+    FILE* file = fopen(filename, "r");
+    char data[10] = "";
+    fscanf(file, "%s", data);
+    fclose(file);
+
+    assert(strcmp(data, "") == 0);
+}
+
+
+void test_filter_word_2_sequence_not_in() {
+    const char filename[] = "D:\\GitHub\\OP\\Lab19\\task_4_test_2.txt";
+
+    generate_string(filename, "qwe rtg ngfm");
+    char source_word[] = "bgmk";
+    filter_word(filename, source_word);
+
+    FILE* file = fopen(filename, "r");
+    char data[10] = "";
+    fscanf(file, "%s", data);
+    fclose(file);
+
+    assert(strcmp(data, "") == 0);
+}
+
+void test_filter_word_3_sequence_in() {
+    const char filename[] = "D:\\GitHub\\OP\\Lab19\\task_4_test_3.txt";
+
+    generate_string(filename, "bvgh vhv jaef kfk");
+    char source_word[] = "v";
+    filter_word(filename, source_word);
+
+    FILE* file = fopen(filename, "r");
+    char data[40] = "";
+    fgets(data, sizeof(data), file);
+    fclose(file);
+
+    assert(strcmp(data, "bvgh  vhv   ") == 0);
+}
+
+void test_filter_word() {
+    test_filter_word_1_empty_file();
+    test_filter_word_2_sequence_not_in();
+    test_filter_word_3_sequence_in();
+}
+
 int main(){
 
     test_matrix_transpose();
     test_convert_float();
     test_calculate();
+    test_filter_word();
 }
