@@ -2,6 +2,8 @@
 #include "lib\data_structures\Matrix.h"
 #include <stdlib.h>
 #include <assert.h>
+#include "lib\data_structures\String_lib.h"
+#include "lib\data_structures\Void_Vector_lib.h"
 
 void generate_random_matrix_file(const char* filename, size_t n) {
 
@@ -188,7 +190,129 @@ void test_matrix_transpose() {
     test_matrix_transpose_3_matrix();
 }
 
+void generate_float(const char* filename, int n) {
+
+    FILE* file = fopen(filename, "w");
+    if (file == NULL) {
+        printf("reading error\n");
+        exit(1);
+    }
+
+    for (size_t i = 0; i < n; i++)
+        fprintf(file, "%f ", 10.0 * rand() / RAND_MAX);
+
+    fclose(file);
+}
+
+void convert_float(const char* filename) {
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("reading error\n");
+        exit(1);
+    }
+
+    vectorVoid v = createVoidVector(0, sizeof(float));
+
+    while (!feof(file)) {
+        float x;
+        fscanf(file, "%f", &x);
+
+        pushBackVoid(&v, &x);
+    }
+
+    fclose(file);
+
+    file = fopen(filename, "w");
+
+    for (size_t i = 0; i < v.size; i++) {
+        float x;
+        getVoidVectorValue(&v, i, &x);
+        fprintf(file, "%.2lf ", x);
+    }
+
+    deleteVoidVector(&v);
+    fclose(file);
+}
+
+
+void test_convert_float_1_zero_numbers() {
+    const char filename[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_2_test_1.txt";
+
+    FILE* file = fopen(filename, "w");
+    fclose(file);
+
+    convert_float(filename);
+
+    file = fopen(filename, "r");
+
+    char data[10] = "";
+    fscanf(file, "%s", data);
+
+    fclose(file);
+
+    assert(strcmp(data, "0.00") == 0);
+}
+
+void test_convert_float_2_one_number() {
+    const char filename[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_2_test_2.txt";
+
+    float number = 404.7891462156415651;
+
+    FILE* file = fopen(filename, "w");
+
+    fprintf(file, "%f", number);
+
+    fclose(file);
+
+    convert_float(filename);
+
+    file = fopen(filename, "r");
+
+    char data[10] = "";
+    fscanf_s(file, "%s", data);
+
+    fclose(file);
+
+    char res[10] = "404.78";
+
+    assert(strcmp(data, res) == 0);
+}
+
+void test_convert_float_3_three_numbers() {
+    const char filename[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_2_test_3.txt";
+
+    float number1 = 7.143423;
+    float number2 = 2.241518;
+    float number3 = 9.353738;
+
+    FILE* file = fopen(filename, "w");
+
+    fprintf(file, "%f %f %f",number1, number2,number3);
+
+    fclose(file);
+
+    convert_float(filename);
+
+    file = fopen(filename, "r");
+
+    char data[100] = "";
+    fgets(data, sizeof(data), file);
+
+    fclose(file);
+
+    char res[100] = "7.14 2.24 9.35 ";
+
+    assert(strcmp(data, res) == 0);
+}
+
+void test_convert_float() {
+    test_convert_float_1_zero_numbers();
+    test_convert_float_2_one_number();
+    test_convert_float_3_three_numbers();
+}
+
 int main(){
 
     test_matrix_transpose();
+    test_convert_float();
 }
