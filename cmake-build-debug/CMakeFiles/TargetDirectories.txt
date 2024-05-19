@@ -1,0 +1,3 @@
+D:/BSTU Shukhov/LionProjects/lab_19_19/cmake-build-debug/CMakeFiles/lab_19_19.dir
+D:/BSTU Shukhov/LionProjects/lab_19_19/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/BSTU Shukhov/LionProjects/lab_19_19/cmake-build-debug/CMakeFiles/rebuild_cache.dir
