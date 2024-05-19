@@ -1481,6 +1481,63 @@ typedef struct order {
     int quantity;
 } order;
 
+void generate_product_and_order(const char* filename1, const char* filename2) {
+    FILE* file1 = fopen(filename1, "wb");
+    if (file1 == NULL) {
+        printf("reading error\n");
+        exit(1);
+    }
+
+    FILE* file2 = fopen(filename2, "wb");
+    if (file2 == NULL) {
+        printf("reading error\n");
+        exit(1);
+    }
+
+    int amount_product = rand() % 15 + 1;
+    int amount_order = amount_product % 2 + 1;
+
+    for (int i = 0; i < amount_product; i++) {
+        product pr;
+        order od;
+
+        pr.unit_price = rand() % 100 + 1;
+        pr.quantity = rand() % 20 + 1;
+        pr.total_cost = pr.unit_price * pr.quantity;
+
+        int name_length = rand() % 10 + 1;
+        char* product_rec_ptr = pr.product_name;
+        char* order_rec_ptr = od.order_name;
+
+        for (int j = 0; j < name_length; j++) {
+            char ch = rand() % 26 + 97;
+
+            *product_rec_ptr = ch;
+            product_rec_ptr++;
+
+            if (amount_order > 0) {
+                *order_rec_ptr = ch;
+                order_rec_ptr++;
+            }
+        }
+
+        *product_rec_ptr = '\0';
+        if (amount_order > 0) {
+            *order_rec_ptr = '\0';
+            od.quantity = rand() % 25 + 1;
+        }
+
+        fwrite(&pr, sizeof(product), 1, file1);
+        if (amount_order > 0)
+            fwrite(&od, sizeof(order), 1, file2);
+
+        amount_order--;
+    }
+
+    fclose(file1);
+    fclose(file2);
+}
+
 void update_product(const char* filename1, const char* filename2) {
     vectorVoid v1 = createVoidVector(16, sizeof(product));
     vectorVoid v2 = createVoidVector(16, sizeof(order));
@@ -1539,8 +1596,8 @@ void update_product(const char* filename1, const char* filename2) {
 }
 
 void test_update_product_1_empty_files() {
-    const char filename1[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_10_test_1.txt";
-    const char filename2[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_10_test_1a.txt";
+    const char filename1[] = "D:\\GitHub\\OP\\Lab19\\task_10_test_1.txt";
+    const char filename2[] = "D:\\GitHub\\OP\\Lab19\\task_10_test_1a.txt";
 
     FILE* file = fopen(filename1, "wb");
     fclose(file);
@@ -1565,8 +1622,8 @@ void test_update_product_1_empty_files() {
 }
 
 void test_update_product_2_order_more_product() {
-    const char filename1[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_10_test_2.txt";
-    const char filename2[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_10_test_2a.txt";
+    const char filename1[] = "D:\\GitHub\\OP\\Lab19\\task_10_test_2.txt";
+    const char filename2[] = "D:\\GitHub\\OP\\Lab19\\task_10_test_2a.txt";
 
     product pr1 = {.product_name="name1", .unit_price=10, .total_cost=30, .quantity=3};
     product pr2 = {.product_name="name2", .unit_price=20, .total_cost=40, .quantity=2};
@@ -1603,8 +1660,8 @@ void test_update_product_2_order_more_product() {
 }
 
 void test_update_product_3_order_less_product() {
-    const char filename1[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_10_test_3.txt";
-    const char filename2[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_10_test_3a.txt";
+    const char filename1[] = "D:\\GitHub\\OP\\Lab19\\task_10_test_3.txt";
+    const char filename2[] = "D:\\GitHub\\OP\\Lab19\\task_10_test_3a.txt";
 
     product pr1 = {.product_name="name1", .unit_price=10, .total_cost=30, .quantity=3};
     product pr2 = {.product_name="name2", .unit_price=20, .total_cost=240, .quantity=12};
@@ -1646,10 +1703,43 @@ void test_update_product_3_order_less_product() {
     assert(strcmp(od.order_name, res_od.order_name) == 0 && od.quantity == res_od.quantity);
 }
 
+void test_update_product_4_second_file_empty() {
+    const char filename1[] = "D:\\GitHub\\OP\\Lab19\\task_10_test_4.txt";
+    const char filename2[] = "D:\\GitHub\\OP\\Lab19\\task_10_test_4a.txt";
+
+    FILE* file = fopen(filename1, "wb");
+    product pr = {.product_name="name", .unit_price=10, .total_cost=20, .quantity=2};
+    fwrite(&pr, sizeof(product), 1, file);
+    fclose(file);
+
+    file = fopen(filename2, "wb");
+    fclose(file);
+
+    update_product(filename1, filename2);
+
+    file = fopen(filename1, "rb");
+    product res_pr;
+    fread(&res_pr, sizeof(product), 1, file);
+    fclose(file);
+
+    file = fopen(filename2, "rb");
+    char data[10] = "";
+    fread(data, sizeof(data), 1, file);
+    fclose(file);
+
+    assert(strcmp(pr.product_name, res_pr.product_name) == 0);
+    assert(pr.unit_price == res_pr.unit_price);
+    assert(pr.total_cost == res_pr.total_cost);
+    assert(pr.quantity == res_pr.quantity);
+    assert(strcmp(data, "") == 0);
+}
+
+
 void test_update_product() {
     test_update_product_1_empty_files();
     test_update_product_2_order_more_product();
     test_update_product_3_order_less_product();
+    test_update_product_4_second_file_empty();
 }
 
 int main(){
