@@ -1596,8 +1596,8 @@ void update_product(const char* filename1, const char* filename2) {
 }
 
 void test_update_product_1_empty_files() {
-    const char filename1[] = "D:\\GitHub\\OP\\Lab19\\task_10_test_1.txt";
-    const char filename2[] = "D:\\GitHub\\OP\\Lab19\\task_10_test_1a.txt";
+    const char filename1[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_10_test_1.txt";
+    const char filename2[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_10_test_1a.txt";
 
     FILE* file = fopen(filename1, "wb");
     fclose(file);
@@ -1622,8 +1622,8 @@ void test_update_product_1_empty_files() {
 }
 
 void test_update_product_2_order_more_product() {
-    const char filename1[] = "D:\\GitHub\\OP\\Lab19\\task_10_test_2.txt";
-    const char filename2[] = "D:\\GitHub\\OP\\Lab19\\task_10_test_2a.txt";
+    const char filename1[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_10_test_2.txt";
+    const char filename2[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_10_test_2a.txt";
 
     product pr1 = {.product_name="name1", .unit_price=10, .total_cost=30, .quantity=3};
     product pr2 = {.product_name="name2", .unit_price=20, .total_cost=40, .quantity=2};
@@ -1660,8 +1660,8 @@ void test_update_product_2_order_more_product() {
 }
 
 void test_update_product_3_order_less_product() {
-    const char filename1[] = "D:\\GitHub\\OP\\Lab19\\task_10_test_3.txt";
-    const char filename2[] = "D:\\GitHub\\OP\\Lab19\\task_10_test_3a.txt";
+    const char filename1[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_10_test_3.txt";
+    const char filename2[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_10_test_3a.txt";
 
     product pr1 = {.product_name="name1", .unit_price=10, .total_cost=30, .quantity=3};
     product pr2 = {.product_name="name2", .unit_price=20, .total_cost=240, .quantity=12};
@@ -1704,8 +1704,8 @@ void test_update_product_3_order_less_product() {
 }
 
 void test_update_product_4_second_file_empty() {
-    const char filename1[] = "D:\\GitHub\\OP\\Lab19\\task_10_test_4.txt";
-    const char filename2[] = "D:\\GitHub\\OP\\Lab19\\task_10_test_4a.txt";
+    const char filename1[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_10_test_4.txt";
+    const char filename2[] = "D:\\BSTU Shukhov\\LionProjects\\lab_19_19\\task_10_test_4a.txt";
 
     FILE* file = fopen(filename1, "wb");
     product pr = {.product_name="name", .unit_price=10, .total_cost=20, .quantity=2};
